@@ -120,8 +120,8 @@ def get_unique_open_realm():
     # realm is an empty realm just used for system bots, so don't
     # include it in this accounting.
     realms = realms.exclude(domain='zulip.com') #edit by yicong for open realm
-    #if len(realms) != 1:
-        #return None
+    if len(realms) < 1:
+        return None
     realm = realms[0]
     if realm.invite_required or realm.restricted_to_domain:
         return None
