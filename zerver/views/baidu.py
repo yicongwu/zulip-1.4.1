@@ -75,7 +75,11 @@ def finish_baidu_oauth2(request):
     code = request.GET.get('code')
     ask_token_uri = 'https://openapi.baidu.com/oauth/2.0/token?grant_type=authorization_code&code='+code+'&client_id='+\
                     settings.BAIDU_OAUTH_CLIENT_ID+'&client_secret='+settings.BAIDU_OAUTH_SECRET+\
-                    '&redirect_uri=http://localhost:9991/login/baidu/complete/'
+                    '&redirect_uri='+ ''.join((
+                            settings.EXTERNAL_URI_SCHEME,#http://  or https://
+                            request.get_host(),#localhost:9991/
+                            reverse('zerver.views.baidu.finish_baidu_oauth2'),
+                            ))#change according to server IP
     resp = requests.get(
         ask_token_uri
     )
