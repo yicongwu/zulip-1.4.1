@@ -261,7 +261,7 @@ def create_user_dev(request):
     json_data = simplejson.loads(request.body)
     email = json_data['email']
     password = json_data['password']
-    realm = Realm.objects.get(name='Tijee_test')
+    realm = get_unique_open_realm()
     full_name = json_data['full_name']
     short_name = email_to_username(email)
     if (UserProfile.objects.filter(email=email).count()!=0):
