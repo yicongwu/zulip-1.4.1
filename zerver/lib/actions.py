@@ -3070,7 +3070,7 @@ def handle_push_notification(user_profile_id, missed_message):
             elif message.recipient.type == Recipient.STREAM:
                 alert = "New mention from %s" % (sender_str,)
             else:
-                alert = "New Zulip mentions and private messages from %s" % (sender_str,)
+                alert = "New Zulip mentions and group messages from %s" % (sender_str,)# change private to group by yicong
 
             if apple:
                 apple_extra_data = {'message_ids': [message.id]}
@@ -3101,6 +3101,8 @@ def handle_push_notification(user_profile_id, missed_message):
                     android_data['topic'] = message.subject
                 elif message.recipient.type in (Recipient.HUDDLE, Recipient.PERSONAL):
                     android_data['recipient_type'] = "private"
+                else :
+                    android_data['recipient_type'] = "group"  #add group type by yicong
 
                 send_android_push_notification(user_profile, android_data)
 

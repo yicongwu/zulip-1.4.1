@@ -1016,7 +1016,7 @@ class Message(ModelReprMixin, models.Model):
 
         if recipient_type == Recipient.STREAM:
             display_type = "stream"
-        elif recipient_type in (Recipient.HUDDLE, Recipient.PERSONAL, Recipient.GROUP):#add group by yicong
+        elif recipient_type in (Recipient.HUDDLE, Recipient.PERSONAL):
             assert not isinstance(display_recipient, text_type)
             display_type = "private"
             if len(display_recipient) == 1:
@@ -1032,6 +1032,9 @@ class Message(ModelReprMixin, models.Model):
                     display_recipient = [recip, display_recipient[0]]
                 elif recip['email'] > display_recipient[0]['email']:
                     display_recipient = [display_recipient[0], recip]
+        elif recipient_type == Recipient.GROUP: #add group type by yicong
+            display_type = "group"
+            display_recipient = Group.objects.get(id=recipient_type_id).name
 
         obj = dict(
             id                = message_id,

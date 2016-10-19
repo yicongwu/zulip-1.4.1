@@ -176,7 +176,7 @@ def get_a_user_profile(request, user_id):
     except:
         return json_error("No such user.")
 
-    return json_success({'user_profile':user_profile.realm.domain, 'realm':Realm.objects.filter(deactivated=False).values("name")})
+    return json_success({'user_profile':user_profile.realm.name, 'realm':Realm.objects.filter(deactivated=False).values("name")})
 
 @csrf_exempt
 @login_required
@@ -192,7 +192,7 @@ def send_message_to_memebers(request):
     try:
         #user_profile = UserProfile.objects.get(id=user_id)
         if message_type_name == 'group':
-            message_to = Recipient.objects.get(type_id=recipient_id, type=Recipient.GROUP)
+            message_to = Recipient.objects.get(id=recipient_id, type=Recipient.GROUP)
             #check membership
             if (Subscription.objects.filter(recipient=message_to, user_profile=request.user).count()==0):
                 return json_error("You are not the member of the group!")
@@ -203,9 +203,13 @@ def send_message_to_memebers(request):
     result_id = check_send_message(request.user, client, message_type_name, message_to, subject_name, message_content)
     return json_success({"id":result_id})
 
-def get_group_messages(request, group_id):
-    recipient = Recipient.objects.get(type_id=group_id, type=Recipient.GROUP)
-    return json_success({'messages':Message.objects.filter(recipient=recipient).values("content")})
+def get_group_messages(request, recipient_id):
+    recipient = Recipient.objects.get(id=recipient_id)
+    messages = Message.objects.filter(recipient=recipient)
+    messages_dics = []
+    for item in messages:
+        messages_dics.append(item.to_dict_uncached_helper(True))
+    return json_success({'messages': messages_dics})
 
 @login_required
 def get_client_name(request):
@@ -261,7 +265,7 @@ def create_user_dev(request):
     json_data = simplejson.loads(request.body)
     email = json_data['email']
     password = json_data['password']
-    realm = get_unique_open_realm()
+    realm = Realm.objects.get(name='Tijee_test')
     full_name = json_data['full_name']
     short_name = email_to_username(email)
     if (UserProfile.objects.filter(email=email).count()!=0):
@@ -282,3 +286,20 @@ def delete_user_dev(request):
 
 def get_unique_open_realm_test(request):
     return json_success({'realm':get_unique_open_realm().name})
+
+# get all subscribed groups
+@login_required
+def get_subscribed_groups(request):
+    subscriptions = Subscription.objects.filter(user_profile=request.user)
+    groups = []
+    for sub in subscriptions:
+        if sub.recipient.type == 4:
+            group = Group.objects.get(id=sub.recipient.type_id)
+            item = {
+                'id':group.id,
+                'owner':group.owner.id,
+                'name':group.name,
+                'recipient_id':sub.recipient.id,
+            }
+            groups.append(item)
+    return json_success({'groups':groups})
